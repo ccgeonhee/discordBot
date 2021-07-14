@@ -43,28 +43,25 @@ async def on_ready():
     cur.execute(
         "CREATE TABLE IF NOT EXISTS attcheckTBL (guildID char(30), authorID char(30), checkCnt int(10), isChecked tinyint(1), authorName char(30), PRIMARY KEY (guildID, authorID));")
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS timerTBL (channelID char(30), originTimer int(10), timer int(10), authorID char(30), num int(10) AUTO_INCREMENT PRIMARY KEY);")
-    cur.execute("CREATE TABLE IF NOT EXISTS voteTBL \
-           (guildID char(30), userName char(20), userID char(20), voteID char(20), voteName char(20), authorID char(20), pros tinyint(1), cons tinyint(1), num char(5), voteItem char(30))")  # 수정
+        "CREATE TABLE IF NOT EXISTS timerTBL (channelID char(30), authorID char(30), timerID char(30), time int(10), num int(10) NOT NULL AUTO_INCREMENT PRIMARY KEY);")#수정
     cur.execute(
         "CREATE TABLE IF NOT EXISTS attdateTBL (guildID char(30), authorID char(30), attDate DATE, FOREIGN KEY (guildID, authorID) REFERENCES attcheckTBL(guildID, authorID));")
-    cur.execute("CREATE TABLE IF NOT EXISTS covidTBL (date DATE, data int(5), primary key(date));")  # 수정
-    cur.execute("CREATE TABLE IF NOT EXISTS attsetTBL (guildID char(30), setTime Time);")  # 수정
+    cur.execute("CREATE TABLE IF NOT EXISTS covidTBL (date DATE, data int(5), primary key(date));")
+    cur.execute("CREATE TABLE IF NOT EXISTS attsetTBL (guildID char(30), setTime Time);")
+    cur.execute("CREATE TABLE IF NOT EXISTS testTBL \
+       (guildID char(30), userName char(20), userID char(20), voteID char(20), voteName char(20), authorID char(20), pros tinyint(1), cons tinyint(1), num char(5), voteItem char(30))")#수정
     cur.execute(
         "CREATE EVENT IF NOT EXISTS delete_event ON SCHEDULE EVERY 1 MINUTE STARTS '2020-12-22 15:00:00' ON completion preserve "
-        "ENABLE COMMENT 'DELETE DATA DEADLINE' DO DELETE FROM scheduleTBL where Date_ADD(scheduleDL, INTERVAL 1 DAY) <= Date_ADD(now(), INTERVAL 9 HOUR);")  # 일정기한이 지난 일정 삭제.
+        "ENABLE COMMENT 'DELETE DATA DEADLINE' DO delete from scheduletbl where Date_ADD(scheduleDL, INTERVAL 1 DAY) <= Date_ADD(now(), INTERVAL 9 HOUR);")  # 일정기한이 지난 일정 삭제.
     cur.execute(
         "CREATE EVENT IF NOT EXISTS Change_Checked ON SCHEDULE EVERY 1 DAY STARTS '2020-12-29 15:00:00' ON completion preserve "
-        "ENABLE COMMENT 'Change isChecked == 0' DO UPDATE attcheckTBL SET isChecked = 0;")  # 매일 출석체크 초기화
+        "ENABLE COMMENT 'Change isChecked == 0' DO UPDATE attchecktbl SET isChecked = 0;")  # 매일 출석체크 초기화
     cur.execute(
-        "CREATE EVENT IF NOT EXISTS Change_Month ON SCHEDULE EVERY 1 MONTH STARTS '2020-12-31 15:00:00' ON completion preserve "
-        "ENABLE COMMENT 'Change checkCnt == 0' DO UPDATE attcheckTBL SET checkCnt = 0;")  # 매달 출석일수 초기화
+        "CREATE EVENT IF NOT EXISTS Change_Month ON SCHEDULE EVERY 1 MONTH STARTS '2021-01-01 15:00:00' ON completion preserve "
+        "ENABLE COMMENT 'Change checkCnt == 0' DO UPDATE attchecktbl SET checkCnt = 0;")  # 매달 출석일수 초기화
     cur.execute(
-        "CREATE EVENT IF NOT EXISTS Delete_att_Date ON SCHEDULE EVERY 1 MONTH STARTS '2020-12-31 15:00:00' ON completion preserve "
-        "ENABLE COMMENT 'Delete attDate every 1 month' DO DELETE FROM attdateTBL;")  # 매달 출석일 삭제.
-    cur.execute(
-        "CREATE EVENT IF NOT EXISTS Delete_timer ON SCHEDULE EVERY 1 MINUTE STARTS '2020-12-31 15:00:00' ON completion preserve "
-        "ENABLE COMMENT 'Delete timer every 1 minute' DO DELETE FROM timerTBL WHERE timer < 0;")  #0분 미만 타이머 삭제.
+        "CREATE EVENT IF NOT EXISTS Delete_att_Date ON SCHEDULE EVERY 1 MONTH STARTS '2021-01-01 15:00:00' ON completion preserve "
+        "ENABLE COMMENT 'Delete attDate every 1 month' DO DELETE FROM attdatetbl;")  # 매달 출석일 삭제.
     conn.commit()
     conn.close()
 
